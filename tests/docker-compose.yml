@@ -17,7 +17,9 @@ services:
     volumes:
       - data:/data
       - pgdata:/pgdata
+      - storage:/storage
 
 volumes:
   data:
   pgdata:
+  storage:
