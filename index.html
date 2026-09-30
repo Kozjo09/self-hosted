@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webtor - Web Torrent Player</title>
+  <link rel="icon" href="https://webtor.io/favicon.ico" type="image/x-icon">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary-color: #38bdf8;
+      --primary-hover: #0284c7;
+      --border-color: #334155;
+      --input-bg: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    header h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    main {
+      max-width: 900px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    input[type="text"], input[type="url"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      color: var(--text-color);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus, input[type="url"]:focus {
+      border-color: var(--primary-color);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      background-color: var(--primary-color);
+      color: #0f172a;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .samples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .samples span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .sample-btn {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: var(--primary-color);
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sample-btn:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(56, 189, 248, 0.1);
+    }
+
+    .advanced-toggle {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--primary-color);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      padding: 0;
+    }
+
+    .advanced-settings {
+      display: none;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .advanced-settings.show {
+      display: block;
+    }
+
+    #player-container {
+      width: 100%;
+      min-height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #000;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    #player-placeholder {
+      color: var(--text-muted);
+      text-align: center;
+      padding: 2rem;
+    }
+
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+
+    footer {
+      margin-top: auto;
+      padding-top: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    footer a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 1rem 0.5rem;
+      }
+
+      header h1 {
+        font-size: 1.75rem;
+      }
+
+      .card {
+        padding: 1rem;
+      }
+
+      #player-container {
+        min-height: 280px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Webtor Player</h1>
+    <p>Stream torrent videos and audio directly in your browser</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <form id="torrent-form" onsubmit="handleFormSubmit(event)">
+        <div class="form-group">
+          <label for="torrent-input">Magnet URI or Torrent File URL</label>
+          <input
+            type="text"
+            id="torrent-input"
+            placeholder="magnet:?xt=urn:btih:... or https://example.com/file.torrent"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn">Start Playing</button>
+      </form>
+
+      <div class="samples">
+        <span>Try sample torrents:</span>
+        <button class="sample-btn" type="button" onclick="loadSample('sintel')">Sintel (Movie)</button>
+        <button class="sample-btn" type="button" onclick="loadSample('bbb')">Big Buck Bunny</button>
+        <button class="sample-btn" type="button" onclick="loadSample('cosmos')">Cosmos Laundromat</button>
+      </div>
+
+      <button type="button" class="advanced-toggle" onclick="toggleAdvanced()">⚙ Advanced Settings</button>
+
+      <div id="advanced-settings" class="advanced-settings">
+        <div class="form-group">
+          <label for="base-url-input">Webtor Backend Base URL</label>
+          <input
+            type="text"
+            id="base-url-input"
+            placeholder="https://webtor.io or http://localhost:8080"
+            value="https://webtor.io"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section id="player-container">
+      <div id="player-placeholder">
+        <p>Enter a magnet link or select a sample torrent to start streaming</p>
+      </div>
+      <div id="player"></div>
+    </section>
+  </main>
+
+  <footer>
+    Powered by <a href="https://webtor.io" target="_blank" rel="noopener">Webtor.io</a> &mdash; Self-hosted & Cloud Torrent Streaming
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@webtor/embed-sdk-js/dist/index.min.js" charset="utf-8" async></script>
+  <script>
+    const SAMPLES = {
+      sintel: {
+        magnet: 'magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337',
+        title: 'Sintel'
+      },
+      bbb: {
+        magnet: 'magnet:?xt=urn:btih:dd8255edd8472221b6d17b2b64a4b4eeff8246bc&dn=Big+Buck+Bunny&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337',
+        title: 'Big Buck Bunny'
+      },
+      cosmos: {
+        magnet: 'magnet:?xt=urn:btih:c694b08e280809279dc413cb0930b50ed4966624&dn=Cosmos+Laundromat&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337',
+        title: 'Cosmos Laundromat'
+      }
+    };
+
+    function toggleAdvanced() {
+      const adv = document.getElementById('advanced-settings');
+      adv.classList.toggle('show');
+    }
+
+    function initPlayer(torrentSource, baseUrl, title) {
+      const playerDiv = document.getElementById('player');
+      const placeholder = document.getElementById('player-placeholder');
+
+      // Clear existing player element
+      playerDiv.innerHTML = '';
+      placeholder.style.display = 'none';
+      playerDiv.style.display = 'block';
+
+      const config = {
+        id: 'player',
+        baseUrl: baseUrl || 'https://webtor.io',
+        width: '100%',
+        height: '100%',
+        controls: true
+      };
+
+      if (title) {
+        config.title = title;
+      }
+
+      if (torrentSource.startsWith('magnet:?')) {
+        config.magnet = torrentSource;
+      } else {
+        config.torrentUrl = torrentSource;
+      }
+
+      window.webtor = window.webtor || [];
+      window.webtor.push(config);
+
+      // Update URL search params without page reload
+      const url = new URL(window.location);
+      if (torrentSource.startsWith('magnet:?')) {
+        url.searchParams.set('magnet', torrentSource);
+        url.searchParams.delete('torrentUrl');
+      } else {
+        url.searchParams.set('torrentUrl', torrentSource);
+        url.searchParams.delete('magnet');
+      }
+      if (baseUrl && baseUrl !== 'https://webtor.io') {
+        url.searchParams.set('baseUrl', baseUrl);
+      } else {
+        url.searchParams.delete('baseUrl');
+      }
+      window.history.replaceState({}, '', url);
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('torrent-input').value.trim();
+      const baseUrl = document.getElementById('base-url-input').value.trim();
+      if (!input) return;
+      initPlayer(input, baseUrl);
+    }
+
+    function loadSample(key) {
+      const sample = SAMPLES[key];
+      if (!sample) return;
+      document.getElementById('torrent-input').value = sample.magnet;
+      const baseUrl = document.getElementById('base-url-input').value.trim();
+      initPlayer(sample.magnet, baseUrl, sample.title);
+    }
+
+    // Check query params on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const magnet = params.get('magnet');
+      const torrentUrl = params.get('torrentUrl');
+      const baseUrl = params.get('baseUrl') || 'https://webtor.io';
+      const title = params.get('title');
+
+      if (baseUrl) {
+        document.getElementById('base-url-input').value = baseUrl;
+      }
+
+      if (magnet) {
+        document.getElementById('torrent-input').value = magnet;
+        initPlayer(magnet, baseUrl, title);
+      } else if (torrentUrl) {
+        document.getElementById('torrent-input').value = torrentUrl;
+        initPlayer(torrentUrl, baseUrl, title);
+      }
+    });
+  </script>
+</body>
+</html>
